@@ -4,7 +4,7 @@ STD = -std=c++98
 NAME = ft_containers
 CFLAGS = -Wall -Werror -Wextra
 
-SOURCES = ./Sources/main.cpp
+SOURCES = ./main.cpp
 
 OBJECT = $(SOURCES:.cpp=.o)
 
@@ -20,3 +20,5 @@ fclean: clean
 	$(RM) $(NAME)
 
 re: fclean all
+
+.PHONY: all clean fclean re
