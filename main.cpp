@@ -1,4 +1,6 @@
 # include "./Sources/vector.hpp"
+# include <vector>
+# include <iostream>
 
 /* Bunlar araştırılacak
 
@@ -18,7 +20,6 @@
 // std::map::value_compare uygulanması için friend kullanma iznin var
 
 int main(void){
-
-
+        
         return (0);
 }
