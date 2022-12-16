@@ -2,7 +2,7 @@ CC = c++
 RM = rm -rf
 STD = -std=c++98
 NAME = ft_containers
-CFLAGS = #-Wall -Werror -Wextra
+CFLAGS = -Wall -Werror -Wextra
 
 SOURCES = ./main.cpp
 

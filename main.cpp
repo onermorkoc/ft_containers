@@ -4,6 +4,6 @@
 // std::map::value_compare uygulanması için friend kullanma iznin var
 
 int main(void){
-        
+
         return (0);
 }

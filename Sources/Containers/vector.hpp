@@ -163,29 +163,29 @@ namespace ft{
 
                         // Dizinin gelen indexteki elemanın değerini döndürür.
                         reference at(size_type n){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                return (this->array[n]);
                         }
                         
                         const_reference at(size_type n) const{
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                return (this->array[n]);
                         }
 
                         // Dizinin ilk elemanın değerini döndürür.
                         reference front(void){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                return (*this->array);
                         }
                         
                         const_reference front(void) const{
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                return (*this->array);
                         }
 
                         // Dizinin son elemanın değerini döndürür.
                         reference back(void){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                return (this->array[this->array_size - 1]);
                         }
                         
                         const_reference back(void) const{
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                return (this->array[this->array_size - 1]);
                         }
 
                         // Vector'un türünden düz dizi yapıp döndürür.
@@ -276,11 +276,11 @@ namespace ft{
 
                         // ft::vector<T> v(5); v[2] dizinin 2. indexsini döndürür
                         reference operator[](size_type n){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                return (this->at(n));
                         }
                         
                         const_reference operator[](size_type n) const{
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                return (this->at(n));
                         }
 
                         // ############################### => Test <= ###############################

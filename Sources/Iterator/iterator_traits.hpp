@@ -17,7 +17,7 @@ namespace ft{
         };
 
         template <typename T>
-        class iterator_traits< T*>{
+        class iterator_traits<T*>{
 
                 public:
                         typedef         T                                       value_type;
