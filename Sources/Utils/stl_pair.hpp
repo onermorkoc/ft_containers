@@ -26,8 +26,8 @@ namespace ft{
                 
                 // Copy
                 template<typename U, typename V>
-                pair(const pair<U, V> &pr){
-                        *this = pr;
+                pair(const pair<U, V> &copy){
+                        *this = copy;
                 }
 
                 // Constructor v1                
@@ -39,10 +39,12 @@ namespace ft{
                 // ###################################### => Operator Overloading <= ######################################
 
                 // Copy Assignment
-                pair &operator=(const pair &pr){
+                pair &operator=(const pair &copy){
 
-                        this->first = pr.first;
-                        this->second = pr.second;
+                        if (*this != copy){
+                                this->first = copy.first;
+                                this->second = copy.second;
+                        }
                         return (*this);
                 }
         };

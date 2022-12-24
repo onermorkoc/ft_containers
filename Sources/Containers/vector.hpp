@@ -19,7 +19,7 @@ namespace ft{
 
                 public:
 
-                        // ############################### => Typedef <= ###############################  
+                        // ############################### => Typedef <= ###############################                // Örnek:
 
                         typedef                 T                                               value_type;             // int
                         typedef                 Alloc                                           allocator_type;         // allocator<int> classı
@@ -39,7 +39,7 @@ namespace ft{
                         pointer         array;
                         size_type       array_size;
                         size_type       array_capacity;
-                        allocator_type  object;
+                        allocator_type  alloc;
 
                         void checkLength(size_type n){
                                 if (n < 0 || n > INT_MAX)
@@ -47,16 +47,16 @@ namespace ft{
                         }
 
                         void firstExecute(const allocator_type &alloc){
-                                this->object = alloc;
+                                this->alloc = alloc;
                                 this->array_size = 0;
                                 this->array_capacity = 0;
-                                this->array = this->object.allocate(0, NULL);
+                                this->array = this->alloc.allocate(0, NULL);
                         }
 
                         void freeArray(void){
                                 for (size_type i = 0; i < this->array_size; i++)
-                                        this->object.destroy(this->array++);
-                                this->object.deallocate(this->array - this->array_size, this->array_capacity);
+                                        this->alloc.destroy(this->array++);
+                                this->alloc.deallocate(this->array - this->array_size, this->array_capacity);
                         }
 
                 public:
@@ -84,7 +84,7 @@ namespace ft{
 
                         // Copy
                         vector(const vector &copy){
-                                this->firstExecute(copy.object);
+                                this->firstExecute(copy.alloc);
                                 *this = copy;
                         }
 
@@ -141,7 +141,7 @@ namespace ft{
                         }
 
                         size_type max_size(void) const{
-                                return (this->object.max_size());
+                                return (this->alloc.max_size());
                         }
 
                         // Dizinin size yeniden boyutlandırmak için kullanılır
@@ -172,18 +172,19 @@ namespace ft{
                                 
                                 if (n < 0 || n > INT_MAX)
                                         throw std :: length_error("ft::bad_alloc");
-                                else if (n > this->array_capacity){
+                                else if (n > this->array_capacity){ // kapasite büyütmeye yönelik
 
-                                        pointer new_array = object.allocate(n, NULL);
+                                        pointer new_array = alloc.allocate(n, NULL);
                                         iterator first = this->begin();
 
                                         while (first != this->end())
-                                                this->object.construct(new_array++, *first++);
+                                                this->alloc.construct(new_array++, *first++);
 
                                         this->freeArray();
                                         this->array_capacity = n;
                                         this->array = new_array - this->array_size;
                                 }
+                                // kapasite küçültmeye yönelik herhangi bişey yapmıyoruz 
                         }
 
                         // ***************** ===> Dizinin elemanlarına erişmeye yönelik <=== *****************
@@ -258,7 +259,7 @@ namespace ft{
 
                         // Dizinin en sonuna ki elemanı çıkartır ve diziyi bir küçültür
                         void pop_back(void){
-                                this->object.destroy(this->array + this->array_size - 1);
+                                this->alloc.destroy(this->array + this->array_size - 1);
                                 this->array_size--;
                         }
 
@@ -269,16 +270,16 @@ namespace ft{
                                 
                                 if (this->array_size + 1 > this->array_capacity){ // yeterli kapasite yoksa
 
-                                        pointer new_array = object.allocate(this->array_capacity + 1, NULL);
+                                        pointer new_array = alloc.allocate(this->array_capacity + 1, NULL);
                                         iterator first = this->begin();
 
                                         while (first != position)
-                                                this->object.construct(new_array++, *first++);
+                                                this->alloc.construct(new_array++, *first++);
 
-                                        this->object.construct(new_array++, val);
+                                        this->alloc.construct(new_array++, val);
 
                                         while (position != this->end())
-                                                 this->object.construct(new_array++, *position++);
+                                                 this->alloc.construct(new_array++, *position++);
 
                                         this->freeArray();
                                         this->array_capacity++;
@@ -290,14 +291,15 @@ namespace ft{
                                         size_type i = ++this->array_size - 1;
 
                                         while (i > (size_type)std::distance(this->begin(), position)){
-                                                this->object.construct((this->array + i), *(this->array + i - 1));
+                                                this->alloc.construct((this->array + i), *(this->array + i - 1));
                                                 i--;
                                         }
-                                        this->object.construct((this->array + i), val);
+                                        this->alloc.construct((this->array + i), val);
                                 }
                                 return (this->begin() + index);
                         }
 
+                        // n kadar position sonrasına val ekle
                         void insert(iterator position, size_type n, const value_type &val){
 
                                 for (size_type i = 0; i < n; i++){
@@ -305,6 +307,7 @@ namespace ft{
                                 }
                         }
 
+                        // first ve last iterator aralığını position den sonrasına ekle. Buradaki position bizim arraymize ait
                         template <typename InputIterator>
                         void insert(iterator position, InputIterator first, typename ft::enable_if< !is_integral<InputIterator>::value_type, InputIterator >::type last){
 
@@ -313,19 +316,20 @@ namespace ft{
                                 }
                         }
 
-                        // Erase fonksiyonları diziden direk eleman silme veya aralık vererek toplu eleman silmeye yarar 
+                        // Erase fonksiyonları diziden direk eleman silme veya aralık vererek toplu eleman silmeye yarar
                         iterator erase(iterator position){
 
                                 int index = std::distance(this->begin(), position);
                                 size_type i = index - 1;
 
                                 while (++i < this->array_size - 1)
-                                        this->object.construct((this->array + i), *(this->array + i + 1));
+                                        this->alloc.construct((this->array + i), *(this->array + i + 1));
                                                               
                                 this->array_size--;
                                 return (this->begin() + index);
                         }
                         
+                        // first ve last iki iterator arasındaki herşeyi sil (aslında silmiyoruz yana kaydırıyoruz)
                         iterator erase(iterator first, iterator last){
 
                                 iterator temp = first;
@@ -338,7 +342,7 @@ namespace ft{
 
                         // std :: swap kullancaz
                         void swap(vector &x){
-                                std :: swap(this->object, x.object);
+                                std :: swap(this->alloc, x.alloc);
                                 std :: swap(this->array, x.array);
                                 std :: swap(this->array_size, x.array_size);
                                 std :: swap(this->array_capacity, x.array_capacity);
@@ -347,12 +351,12 @@ namespace ft{
                         // Dizinin tüm elemanlarını siler
                         void clear(void){
                                 this->freeArray();
-                                this->firstExecute(this->object);
+                                this->firstExecute(this->alloc);
                         }
 
                         // Allocator dan gelen nesneyi geri döndürülür
                         allocator_type get_allocator(void) const{
-                                return(this->object);
+                                return(this->alloc);
                         }
 
                         // ############################### => Operator Overloading <= ###############################
@@ -362,10 +366,10 @@ namespace ft{
 
                                 if(*this != copy){
                                         this->freeArray();
-                                        this->object = copy.object;
+                                        this->alloc = copy.alloc;
                                         this->array_size = copy.array_size;
                                         this->array_capacity = copy.array_capacity;
-                                        this->array = this->object.allocate(this->array_capacity, NULL);
+                                        this->array = this->alloc.allocate(this->array_capacity, NULL);
                                         this->assign(copy.begin(), copy.end());
                                 }
                                 return (*this);
@@ -381,14 +385,16 @@ namespace ft{
                         }
         };
 
+        // ############################### => No-member functions <= ###############################
+
         template< typename T, typename Alloc >
         void swap( ft::vector<T, Alloc> &lhs, ft::vector<T,Alloc> &rhs){
                 std :: swap(lhs, rhs);
         }
 
-        // ############################### => Mantıksal Operator Overloading <= ###############################
-        // Not: (==) ilk gelen iki dizinin boyutlarına göre bir kıyaslanma olacak boyutları eşit ise equal
-        // kullanarak işlem yapılacak
+        // ############################### => Operator Overloading <= ###############################
+        // Not: (==) ilk gelen iki dizinin boyutlarına göre bir kıyaslanma olacak boyutları eşit ise
+        // equal kullanarak işlem yapılacak
         //
         // (<) de ise lexicographical_compare algoritmasını kullanarak bir kıyaslama yapıcaz
 
