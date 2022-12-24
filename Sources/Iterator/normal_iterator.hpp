@@ -37,18 +37,26 @@ namespace ft{
                 }
 
                 // Copy
-                template <class Iter> 
-                normal_iterator(const normal_iterator<Iter> &rev_it){
-                        this->i = rev_it.i;
+                template <typename Iter> 
+                normal_iterator(const normal_iterator<Iter> &copy){
+                        this->i = copy.base();
                 }
 
                 // ############################ => Metot <= ############################
 
-                iterator_type base(void) const{
+                const iterator_type base(void) const{
                         return (this->i);
                 }
 
                 // ############################ => Operator Overloading <= ############################
+
+                // Copy Assignment
+                normal_iterator &operator=(const normal_iterator &copy){
+
+                        if (*this != copy)
+                                this->i = copy.base();
+                        return (*this);
+                }
 
                 reference operator*(void) const{
                         return (*this->i);
@@ -99,14 +107,21 @@ namespace ft{
                 }
 
                 reference operator[](difference_type n) const{
-                        return (this->i[n]);
+                        return (*(this->i + n));
                 }
         };
 	
         // ############################ => Operator Overloading <= ############################
+        // Not: Çift olmasın nedeni templateler 2 farklı türde olabilir diye belirtiyoruz
+        // örnek kullanım olarak: iterator != const_iterator
 
         template <typename Iterator> 
         bool operator==(const normal_iterator<Iterator> &lhs, const normal_iterator<Iterator> &rhs){
+                return (lhs.base() == rhs.base());
+        }
+
+        template <typename IteratorL, typename IteratorR> 
+        bool operator==(const normal_iterator<IteratorL> &lhs, const normal_iterator<IteratorR> &rhs){
                 return (lhs.base() == rhs.base());
         }
 
@@ -115,8 +130,18 @@ namespace ft{
                 return (lhs.base() != rhs.base());
         }
 
+        template <typename IteratorL, typename IteratorR> 
+        bool operator!=(const normal_iterator<IteratorL> &lhs, const normal_iterator<IteratorR> &rhs){
+                return (lhs.base() != rhs.base());
+        }
+
         template <typename Iterator> 
         bool operator<(const normal_iterator<Iterator> &lhs, const normal_iterator<Iterator> &rhs){
+                return (lhs.base() < rhs.base());
+        }
+
+        template <typename IteratorL, typename IteratorR> 
+        bool operator<(const normal_iterator<IteratorL> &lhs, const normal_iterator<IteratorR> &rhs){
                 return (lhs.base() < rhs.base());
         }
 
@@ -125,8 +150,18 @@ namespace ft{
                 return (lhs.base() <= rhs.base());
         }
 
+        template <typename IteratorL, typename IteratorR> 
+        bool operator<=(const normal_iterator<IteratorL> &lhs, const normal_iterator<IteratorR> &rhs){
+                return (lhs.base() <= rhs.base());
+        }
+
         template <typename Iterator> 
         bool operator>(const normal_iterator<Iterator> &lhs, const normal_iterator<Iterator> &rhs){
+                return (lhs.base() > rhs.base());
+        }
+
+        template <typename IteratorL, typename IteratorR> 
+        bool operator>(const normal_iterator<IteratorL> &lhs, const normal_iterator<IteratorR> &rhs){
                 return (lhs.base() > rhs.base());
         }
 
@@ -135,14 +170,24 @@ namespace ft{
                 return (lhs.base() >= rhs.base());
         }
 
+        template <typename IteratorL, typename IteratorR> 
+        bool operator>=(const normal_iterator<IteratorL> &lhs, const normal_iterator<IteratorR> &rhs){
+                return (lhs.base() >= rhs.base());
+        }
+
         template <typename Iterator> // int x + iterator
-        normal_iterator<Iterator> operator+(typename normal_iterator<Iterator>::difference_type n, const normal_iterator<Iterator> &rev_it){
-                return (normal_iterator<Iterator>(rev_it.base() + n));
+        normal_iterator<Iterator> operator+(typename normal_iterator<Iterator>::difference_type n, const normal_iterator<Iterator> &it){
+                return (normal_iterator<Iterator>(it.base() + n));
         }
 
         template <typename Iterator> // iki iterator arası mesafeyi hesaplıyor
         typename normal_iterator<Iterator>::difference_type operator-(const normal_iterator<Iterator> &lhs, const normal_iterator<Iterator> &rhs){
-                return (typename normal_iterator<Iterator>::difference_type(rhs.base() - lhs.base()));
+                return (lhs.base() - rhs.base());
+        }
+
+        template <typename IteratorL, typename IteratorR>
+        typename normal_iterator<IteratorL>::difference_type operator-(const normal_iterator<IteratorL> &lhs, const normal_iterator<IteratorR> &rhs){
+                return (lhs.base() - rhs.base());
         }
 }
 

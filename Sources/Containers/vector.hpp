@@ -1,9 +1,16 @@
 # ifndef VECTOR_HPP
 # define VECTOR_HPP
 
-# include <iostream>
 # include "../Iterator/normal_iterator.hpp"
 # include "../Iterator/reverse_iterator.hpp"
+# include "../Utils/stl_algobase.hpp"
+# include "../Utils/type_traits.hpp"
+# include <climits>
+# include <sstream>
+
+/* c++98 standartlarına göre to_string işlevini yapıyor */
+#define SSTR( x ) static_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
 
 namespace ft{
 
@@ -24,7 +31,7 @@ namespace ft{
                         typedef typename        allocator_type::size_type                       size_type;              // unsigned int
 
                         typedef typename        ft::normal_iterator<pointer>                    iterator;
-                        typedef typename        ft::normal_iterator<pointer>                    const_iterator;
+                        typedef typename        ft::normal_iterator<const_pointer>              const_iterator;
                         typedef typename        ft::reverse_iterator<iterator>                  reverse_iterator;
                         typedef typename        ft::reverse_iterator<const_iterator>            const_reverse_iterator;
 
@@ -34,48 +41,56 @@ namespace ft{
                         size_type       array_capacity;
                         allocator_type  object;
 
+                        void checkLength(size_type n){
+                                if (n < 0 || n > INT_MAX)
+                                        throw std :: length_error("cannot create ft::vector larger than max_size()");
+                        }
+
+                        void firstExecute(const allocator_type &alloc){
+                                this->object = alloc;
+                                this->array_size = 0;
+                                this->array_capacity = 0;
+                                this->array = this->object.allocate(0, NULL);
+                        }
+
+                        void freeArray(void){
+                                for (size_type i = 0; i < this->array_size; i++)
+                                        this->object.destroy(this->array++);
+                                this->object.deallocate(this->array - this->array_size, this->array_capacity);
+                        }
+
                 public:
 
                         // ############################### => Constructor <= ###############################
 
                         // Default: ft::vector<T> v;  => 0 elemanlı içi boş T türünde dizi olsun
                         explicit vector(const allocator_type &alloc = allocator_type()){
-                                
-                                this->object = alloc;
-                                this->array_size = 0;
-                                this->array_capacity = 0;
-                                this->array = object.allocate(0, NULL);
-
+                                this->firstExecute(alloc);
                         }
 
                         // Constructor v1: ft::vector<int> v(10, 0);    => 10 elemanlı int bir dizi olsun ve tüm elemanları 0 olsun
                         explicit vector(size_type n, const value_type &val = value_type(), const allocator_type &alloc = allocator_type()){
-                                
-                                this->object = alloc;
-                                this->array_size = n;
-                                this->array_capacity = n;
-                                this->array = this->object.allocate(n, NULL);
-
-                                for (int i = 0; i < n; i++){
-                                        this->array[i] = val;
-                                }
-
+                                this->checkLength(n);
+                                this->firstExecute(alloc);
+                                this->insert(this->begin(), n, val);
                         }
 
-                        // Constructor v2: iki iterator aralığı alıcaz kendi arrayımıza eklicez std :: string s parametresi silinecek
-                        template <class InputIterator> 
-                        vector(InputIterator first, InputIterator last, const allocator_type &alloc = allocator_type()){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                        // Constructor v2: iki iterator aralığı alıcaz kendi arrayımıza eklicez
+                        template <typename InputIterator> 
+                        vector(InputIterator first, typename ft::enable_if< !ft::is_integral<InputIterator>::value_type, InputIterator >::type last, const allocator_type &alloc = allocator_type()){
+                                this->firstExecute(alloc);
+                                this->assign(first, last);
                         }
 
                         // Copy
                         vector(const vector &copy){
+                                this->firstExecute(copy.object);
                                 *this = copy;
                         }
 
                         // Destructor
                         ~vector(void){
-                                this->object.deallocate(this->array, this->array_capacity);
+                                this->freeArray();
                         }
 
                         // ############################### => Metotlar <= ###############################
@@ -84,46 +99,38 @@ namespace ft{
 
                         // Dizinin ilk elemanın iteratorunu döndürür.
                         iterator begin(void){
-                                iterator i(this->array);
-                                return (i);
+                                return (iterator(this->array));
                         }
                         
                         const_iterator begin(void) const{
-                                const_iterator i(this->array);
-                                return (i);
+                                return (const_iterator(this->array));
                         }
 
                         // Dizinin son elemanın iteratorunu döndürür.
                         iterator end(void){
-                                iterator i(this->array + this->array_size);
-                                return (i);
+                                return (iterator(this->array + this->array_size));
                         }
                         
                         const_iterator end(void) const{
-                                const_iterator i(this->array + this->array_size);
-                                return (i);
+                                return (const_iterator(this->array + this->array_size));
                         }
 
                         // Dizinin ilk elemanın iteratorunu ters olarak döndürür.
                         reverse_iterator rbegin(void){
-                                reverse_iterator r(this->end() - 1); // -1 null atlamak için
-                                return (r);
+                                return (reverse_iterator(this->end()));
                         }
                         
                         const_reverse_iterator rbegin(void) const{
-                                const_reverse_iterator r(this->end() - 1);
-                                return (r);
+                                return (const_reverse_iterator(this->end()));
                         }
 
                         // Dizinin son elemanın iteratörünü ters olarak döndürür.                        
                         reverse_iterator rend(void){
-                                reverse_iterator r(this->begin() - 1); // -1 bu sefer null olması için
-                                return (r);
+                                return (reverse_iterator(this->begin()));
                         }
                         
                         const_reverse_iterator rend(void) const{
-                                const_reverse_iterator r(this->begin() - 1);
-                                return (r);
+                                return (const_reverse_iterator(this->begin()));
                         }
 
                         // ***************** ===> Kapasite işlemlerine yönelik <=== *****************
@@ -134,12 +141,18 @@ namespace ft{
                         }
 
                         size_type max_size(void) const{
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                return (this->object.max_size());
                         }
 
                         // Dizinin size yeniden boyutlandırmak için kullanılır
                         void resize(size_type n, value_type val = value_type()){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+
+                                if (n < 0 || n > INT_MAX)
+                                        throw std :: length_error("vector::_M_default_append");
+                                else if (n < this->array_size) // size kücültmeye yönelik
+                                        this->array_size = n;   
+                                else // size büyütmeye yönelik
+                                        this->insert(this->end(), (n - this->array_size), val);
                         }
 
                         // Dizinin kapasitesini döndürür
@@ -156,17 +169,35 @@ namespace ft{
 
                         // Dizinin kapasitesini yendiden boyutlandırmak için kullanılır
                         void reserve(size_type n){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                
+                                if (n < 0 || n > INT_MAX)
+                                        throw std :: length_error("ft::bad_alloc");
+                                else if (n > this->array_capacity){
+
+                                        pointer new_array = object.allocate(n, NULL);
+                                        iterator first = this->begin();
+
+                                        while (first != this->end())
+                                                this->object.construct(new_array++, *first++);
+
+                                        this->freeArray();
+                                        this->array_capacity = n;
+                                        this->array = new_array - this->array_size;
+                                }
                         }
 
                         // ***************** ===> Dizinin elemanlarına erişmeye yönelik <=== *****************
 
                         // Dizinin gelen indexteki elemanın değerini döndürür.
                         reference at(size_type n){
+                                if (n < 0 || n >= this->array_size)
+                                        throw std :: out_of_range(SSTR("vector::_M_range_check: __n (which is " << n << ") >= this->size() (which is " << this->array_size << ")"));
                                 return (this->array[n]);
                         }
                         
                         const_reference at(size_type n) const{
+                                if (n < 0 || n >= this->array_size)
+                                        throw std :: out_of_range(SSTR("vector::_M_range_check: __n (which is " << n << ") >= this->size() (which is " << this->array_size << ")"));
                                 return (this->array[n]);
                         }
 
@@ -189,67 +220,134 @@ namespace ft{
                         }
 
                         // Vector'un türünden düz dizi yapıp döndürür.
-                        value_type *data(void) noexcept{
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                        value_type *data(void) {
+                                return (this->array);
                         }
                         
-                        const value_type *data(void) const noexcept{
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                        const value_type *data(void) const {
+                                return (this->array);
                         }
 
                         // ***************** ===> Dizinin elemanlarına modifiye yönelik <=== *****************
 
                         // Assign fonksiyonları diziyi yeniden tanımlamak için kullanılır
-                        template <class InputIterator> 
-                        void assign(InputIterator first, InputIterator last){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                        template <typename InputIterator> 
+                        void assign(InputIterator first, typename ft::enable_if< !ft::is_integral<InputIterator>::value_type, InputIterator >::type last){
+                                
+                                //iki iterator arası mesafeyi gösterir.
+                                if (std::distance(first, last) < 0)
+                                        throw std::length_error("cannot create ft::vector larger than max_size()");
+                                this->array_size = 0;
+                                this->insert(this->begin(), first, last);
                         }
 
                         void assign(size_type n, const value_type &val){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                
+                                if (n < 0 || n > INT_MAX)
+                                        throw std :: length_error("ft::bad_alloc");
+                                else{
+                                        this->array_size = 0;
+                                        this->insert(this->begin(), n, val);
+                                }
                         }
 
                         // Dizinin en sonuna eleman ekler yeterli alan yoksa diziyi bir büyütür
                         void push_back(const value_type &val){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                this->resize(this->array_size + 1, val);
                         }
 
                         // Dizinin en sonuna ki elemanı çıkartır ve diziyi bir küçültür
                         void pop_back(void){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                this->object.destroy(this->array + this->array_size - 1);
+                                this->array_size--;
                         }
 
                         // Insert fonksiyonları diziye toplu eleman eklemek için kullanılır
                         iterator insert(iterator position, const value_type &val){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+
+                                int index = std::distance(this->begin(), position);
+                                
+                                if (this->array_size + 1 > this->array_capacity){ // yeterli kapasite yoksa
+
+                                        pointer new_array = object.allocate(this->array_capacity + 1, NULL);
+                                        iterator first = this->begin();
+
+                                        while (first != position)
+                                                this->object.construct(new_array++, *first++);
+
+                                        this->object.construct(new_array++, val);
+
+                                        while (position != this->end())
+                                                 this->object.construct(new_array++, *position++);
+
+                                        this->freeArray();
+                                        this->array_capacity++;
+                                        this->array_size++;
+                                        this->array = new_array - this->array_size;
+                                        
+                                }else{ // yeterli kapasite varsa
+
+                                        size_type i = ++this->array_size - 1;
+
+                                        while (i > (size_type)std::distance(this->begin(), position)){
+                                                this->object.construct((this->array + i), *(this->array + i - 1));
+                                                i--;
+                                        }
+                                        this->object.construct((this->array + i), val);
+                                }
+                                return (this->begin() + index);
                         }
 
                         void insert(iterator position, size_type n, const value_type &val){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+
+                                for (size_type i = 0; i < n; i++){
+                                        position = insert(position, val);
+                                }
                         }
 
-                        template <class InputIterator>
-                        void insert(iterator position, InputIterator first, InputIterator last){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                        template <typename InputIterator>
+                        void insert(iterator position, InputIterator first, typename ft::enable_if< !is_integral<InputIterator>::value_type, InputIterator >::type last){
+
+                                while (last-- != first){
+                                        position = insert(position, *last);
+                                }
                         }
 
                         // Erase fonksiyonları diziden direk eleman silme veya aralık vererek toplu eleman silmeye yarar 
                         iterator erase(iterator position){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+
+                                int index = std::distance(this->begin(), position);
+                                size_type i = index - 1;
+
+                                while (++i < this->array_size - 1)
+                                        this->object.construct((this->array + i), *(this->array + i + 1));
+                                                              
+                                this->array_size--;
+                                return (this->begin() + index);
                         }
                         
                         iterator erase(iterator first, iterator last){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+
+                                iterator temp = first;
+                                iterator position = first;
+
+                                while (first++ != last)
+                                        position = erase(position);
+                                return (temp);
                         }
 
                         // std :: swap kullancaz
                         void swap(vector &x){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                std :: swap(this->object, x.object);
+                                std :: swap(this->array, x.array);
+                                std :: swap(this->array_size, x.array_size);
+                                std :: swap(this->array_capacity, x.array_capacity);
                         }
 
                         // Dizinin tüm elemanlarını siler
                         void clear(void){
-                                // ++++++++++++ YAZILACAK ++++++++++++
+                                this->freeArray();
+                                this->firstExecute(this->object);
                         }
 
                         // Allocator dan gelen nesneyi geri döndürülür
@@ -262,80 +360,69 @@ namespace ft{
                         // Copy Assignment Operator
                         vector &operator=(const vector &copy){
 
-                                this->object = copy.object;
-                                this->array_size = copy.array_size;
-                                this->array_capacity = copy.array_capacity;
-                                this->array = this->object.allocate(this->array_capacity, NULL);
-
-                                for (int i = 0; i < this->array_size; i++){
-                                        this->array[i] = copy.array[i];
+                                if(*this != copy){
+                                        this->freeArray();
+                                        this->object = copy.object;
+                                        this->array_size = copy.array_size;
+                                        this->array_capacity = copy.array_capacity;
+                                        this->array = this->object.allocate(this->array_capacity, NULL);
+                                        this->assign(copy.begin(), copy.end());
                                 }
                                 return (*this);
-
                         }
 
                         // ft::vector<T> v(5); v[2] dizinin 2. indexsini döndürür
                         reference operator[](size_type n){
-                                return (this->at(n));
+                                return (this->array[n]);
                         }
                         
                         const_reference operator[](size_type n) const{
-                                return (this->at(n));
-                        }
-
-                        // ############################### => Test <= ###############################
-
-                        void elemanEkle(void){
-                                this->array[0] = 56;
-                                this->array[1] = 2;
-                                this->array[2] = 3;
-                                this->array[3] = 4;
-                                this->array[4] = 5;
-                                this->array[5] = 6;
-                                this->array[6] = 90;
-                        }
-
-                        void ekranaBas(void){
-                                std :: cout << "Eleman: " << this->array[0] << std :: endl;
-                                std :: cout << "Eleman: " << this->array[1] << std :: endl;
-                                std :: cout << "Eleman: " << this->array[2] << std :: endl;
-                                std :: cout << "Eleman: " << this->array[3] << std :: endl;
-                                std :: cout << "Eleman: " << this->array[4] << std :: endl;
-                                std :: cout << "Eleman: " << this->array[5] << std :: endl;
-                                std :: cout << "Eleman: " << this->array[6] << std :: endl;                                
+                                return (this->array[n]);
                         }
         };
 
+        template< typename T, typename Alloc >
+        void swap( ft::vector<T, Alloc> &lhs, ft::vector<T,Alloc> &rhs){
+                std :: swap(lhs, rhs);
+        }
+
         // ############################### => Mantıksal Operator Overloading <= ###############################
-        
-        template <class T, class Alloc>
+        // Not: (==) ilk gelen iki dizinin boyutlarına göre bir kıyaslanma olacak boyutları eşit ise equal
+        // kullanarak işlem yapılacak
+        //
+        // (<) de ise lexicographical_compare algoritmasını kullanarak bir kıyaslama yapıcaz
+
+        template <typename T, typename Alloc>
         bool operator==(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs){
-                // ++++++++++++ YAZILACAK ++++++++++++
+                
+                if (lhs.size() != rhs.size())
+                        return (false);
+                return (ft::equal(lhs.begin(), lhs.end(), rhs.begin()));
         }
         
-        template <class T, class Alloc>
+        template <typename T, typename Alloc>
         bool operator!=(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs){
-                // ++++++++++++ YAZILACAK ++++++++++++
+               return (!(lhs == rhs));
         }
         
-        template <class T, class Alloc>
+        template <typename T, typename Alloc>
         bool operator<(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs){
-                // ++++++++++++ YAZILACAK ++++++++++++
+                return (ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()));
         }
         
-        template <class T, class Alloc>
+        template <typename T, typename Alloc>
         bool operator<=(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs){
-                // ++++++++++++ YAZILACAK ++++++++++++
+                return (!(rhs < lhs));
         }
         
-        template <class T, class Alloc>
+        template <typename T, typename Alloc>
         bool operator>(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs){
-                // ++++++++++++ YAZILACAK ++++++++++++
+                return (rhs < lhs);
         }
         
-        template <class T, class Alloc>
+        template <typename T, typename Alloc>
         bool operator>=(const vector<T, Alloc> &lhs, const vector<T, Alloc> &rhs){
-                // ++++++++++++ YAZILACAK ++++++++++++
+                return (!(lhs < rhs));
         }
 }
 
