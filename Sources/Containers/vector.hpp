@@ -6,11 +6,6 @@
 # include "../Utils/stl_algobase.hpp"
 # include "../Utils/type_traits.hpp"
 # include <climits>
-# include <sstream>
-
-/* c++98 standartlarına göre to_string işlevini yapıyor */
-#define SSTR( x ) static_cast< std::ostringstream & >( \
-        ( std::ostringstream() << std::dec << x ) ).str()
 
 namespace ft{
 
@@ -192,13 +187,13 @@ namespace ft{
                         // Dizinin gelen indexteki elemanın değerini döndürür.
                         reference at(size_type n){
                                 if (n < 0 || n >= this->array_size)
-                                        throw std :: out_of_range(SSTR("vector::_M_range_check: __n (which is " << n << ") >= this->size() (which is " << this->array_size << ")"));
+                                        throw std :: out_of_range("invalid index!");
                                 return (this->array[n]);
                         }
                         
                         const_reference at(size_type n) const{
                                 if (n < 0 || n >= this->array_size)
-                                        throw std :: out_of_range(SSTR("vector::_M_range_check: __n (which is " << n << ") >= this->size() (which is " << this->array_size << ")"));
+                                        throw std :: out_of_range("invalid index!");
                                 return (this->array[n]);
                         }
 

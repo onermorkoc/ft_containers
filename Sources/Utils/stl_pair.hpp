@@ -4,8 +4,9 @@
 namespace ft{
 
         // ################################## => pair <= ##################################
-        // Not: icinde 2 farklı veri tipi tutucağımız data diyebiliriz(iki dizi olur bir
-        // sayının tam kısmı ondalık kısmı olabilir vb...) 
+        // Not: içinde 2 farklı veri tipi tutucağımız data diyebiliriz(iki dizi olur bir
+        // sayının tam kısmı ondalık kısmı olabilir vb...). Pair'i map kısmında kullancaz
+        // key-value tutmak için. 
 
         template<typename T1, typename T2>
         struct pair{
@@ -19,28 +20,23 @@ namespace ft{
                 // ###################################### => Constructor <= ######################################
 
                 // Default
-                pair(void){
-                        this->first = first_type();
-                        this->second = second_type();
-                }
-                
-                // Copy
-                template<typename U, typename V>
-                pair(const pair<U, V> &copy){
-                        *this = copy;
-                }
+                pair(void): first(first_type()), second(second_type()) {}
 
                 // Constructor v1                
-                pair (const first_type &a, const second_type &b){
-                        this->first = a;
-                        this->second = b;
-                }
+                pair (const first_type &a, const second_type &b): first(a), second(b) {}
+
+                // Constructor v2
+                template<typename U, typename V>
+                pair(const pair<U, V> &object): first(object.first), second(object.second) {}
+
+                // Copy
+                pair(const pair &copy): first(copy.first), second(copy.second) {}
 
                 // ###################################### => Operator Overloading <= ######################################
 
                 // Copy Assignment
                 pair &operator=(const pair &copy){
-
+                        
                         if (*this != copy){
                                 this->first = copy.first;
                                 this->second = copy.second;
@@ -58,27 +54,27 @@ namespace ft{
 
         template <typename T1, typename T2>
         bool operator!=(const pair<T1, T2> &lhs, const pair<T1, T2> &rhs){
-                return (lhs != rhs);
+                return (!(lhs == rhs));
         }
 
         template <typename T1, typename T2>
         bool operator<(const pair<T1, T2> &lhs, const pair<T1, T2> &rhs){
-                return ((lhs.first < rhs.first) || ((lhs.first < rhs.first) && (lhs.second < rhs.second)));
+                return ((lhs.first < rhs.first) || ((lhs.first == rhs.first) && (lhs.second < rhs.second)));
         }
 
         template <typename T1, typename T2>
         bool operator<=(const pair<T1, T2> &lhs, const pair<T1, T2> &rhs){
-                return (lhs < rhs);
+                return ((lhs < rhs) || (lhs == rhs));
         }
 
         template <typename T1, typename T2>
         bool operator>(const pair<T1, T2> &lhs, const pair<T1, T2> &rhs){
-                return (lhs > rhs);
+                return (rhs < lhs);
         }
 
         template <typename T1, typename T2>
         bool operator>=(const pair<T1, T2> &lhs, const pair<T1, T2> &rhs){
-                return (lhs > rhs);
+                return ((rhs < lhs) || (lhs == rhs));
         }
 
         // ################################## => make_pair <= ##################################

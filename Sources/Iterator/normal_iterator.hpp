@@ -52,7 +52,6 @@ namespace ft{
 
                 // Copy Assignment
                 normal_iterator &operator=(const normal_iterator &copy){
-
                         if (*this != copy)
                                 this->i = copy.base();
                         return (*this);

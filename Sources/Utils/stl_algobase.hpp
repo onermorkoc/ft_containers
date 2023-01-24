@@ -5,9 +5,8 @@ namespace ft{
         
         // ################################## => equal <= ##################################
         // Not: iki diziyi karşılaştırıyor ama bunu iteratorler ile yapıyor Parametre olarak
-        // 1. dizinin iki iterator arası (begin() - end() verirsek tüm diziyi karşılaştırır 
-        // herhangi bir aralık veriyoruz kısaca) ve 2. dizinin başlangıç iteratoru (ondan 
-        // devamını karşılaştırcak)
+        // 1. dizinin iki iterator arası ve 2. dizinin başlangıç iteratoru alıyor. (ondan 
+        // devamını karşılaştırıyor)
         //
         // V2: Ek parametre olarak bir bool döndüren fonksiyon alıyor (fonksiyon parametre
         // olarak T türünden 2 parametre almalı) pred fonksiyonundan gelecek sonuça göre equal 
@@ -16,7 +15,7 @@ namespace ft{
 
         template <typename InputIterator1, typename InputIterator2>
         bool equal (InputIterator1 first1, InputIterator1 last1, InputIterator2 first2){
-                
+
                 while (first1 != last1) {
                         if (*first1++ != *first2++)
                                 return (false);
@@ -26,7 +25,7 @@ namespace ft{
 
         template <typename InputIterator1, typename InputIterator2, typename BinaryPredicate> 
         bool equal (InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, BinaryPredicate pred){
-                
+
                 while (first1 != last1){
                         if (!pred(*first1++, *first2++))
                                 return (false);
@@ -48,23 +47,20 @@ namespace ft{
                 while (first1 != last1){
                         if (first2 == last2 || *first2 < *first1)
                                 return (false);
-                        else if (*first1 < *first2)
+                        else if (*first1++ < *first2++)
                                 return (true);
-                        first1++;
-                        first2++;
                 }
                 return (first2 != last2);
         }
 
         template <typename InputIterator1, typename InputIterator2, typename Compare> 
         bool lexicographical_compare (InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, Compare comp){
+                
                 while (first1 != last1){
                         if (first2 == last2 || comp(*first2, *first1))
                                 return (false);
-                        else if (comp(*first1, *first2))
+                        else if (comp(*first1++, *first2++))
                                 return (true);
-                        first1++;
-                        first2++;
                 }
                 return (first2 != last2);
         }

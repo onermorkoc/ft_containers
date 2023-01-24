@@ -52,14 +52,15 @@ namespace ft{
 
                 // Copy Assignment
                 reverse_iterator &operator=(const reverse_iterator &copy){
-
                         if (*this != copy)
                                 this->i = copy.base();
                         return (*this);
                 }
 
                 reference operator*(void) const{
-                        return (*(this->i - 1));
+                        iterator_type temp = this->i;
+                        temp--;
+                        return (*temp);
                 }
 
                 reverse_iterator operator+(difference_type n) const{

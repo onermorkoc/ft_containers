@@ -1,8 +1,6 @@
 # ifndef TYPE_TRAITS
 # define TYPE_TRAITS
 
-# include <iostream>
-
 namespace ft{
 
         // ################################## => enable_if <= ##################################
@@ -20,7 +18,7 @@ namespace ft{
         // ################################## => is_integral <= ##################################
         // Not: Gelen sablon türü int ise value_type true olarak döndürür
 
-        // Not v2: value_type değişkeninde static const kullanma nedenimiz derleyicinin struct ve
+        // Not: value_type değişkeninde static const kullanma nedenimiz derleyicinin struct ve
         // classlarda direk değer vermesine müsade etmiyor olması static const olursa buna izin veriyor
 
         struct false_type {

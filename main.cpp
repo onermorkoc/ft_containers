@@ -1,61 +1,81 @@
 # include "./Sources/Containers/vector.hpp"
 # include "./Sources/Containers/stack.hpp"
+# include "./Sources/Containers/map.hpp"
 # include <vector>
-# include <list>
 # include <stack>
+# include <map>
 # include <iostream>
-# include <string>
 
-# define TESTED_TYPE int
-# define TESTED_NAMESPACE ft
-# define t_stack_ TESTED_NAMESPACE::stack<TESTED_TYPE>
+int main(void){
 
-typedef t_stack_::container_type container_type;
+	std :: cout << "################################### => Vector <= ###################################" << std :: endl;
 
-template <class T_STACK>
-void	cmp(const T_STACK &lhs, const T_STACK &rhs)
-{
-	static int i = 0;
+	ft::vector<int> v;
 
-	std::cout << "############### [" << i++ << "] ###############"  << std::endl;
-	std::cout << "eq: " << (lhs == rhs) << " | ne: " << (lhs != rhs) << std::endl;
-	std::cout << "lt: " << (lhs <  rhs) << " | le: " << (lhs <= rhs) << std::endl;
-	std::cout << "gt: " << (lhs >  rhs) << " | ge: " << (lhs >= rhs) << std::endl;
-}
+	for(int i = 0; i < 1000; i++){
+		time(NULL);
+		v.push_back(rand() % 1000);
+	}
+	
+	std :: cout << "Size: " << v.size() << std :: endl;
+	std :: cout << "Capacity: " << v.capacity() << std :: endl;
+	std :: cout << "Bu dizi boş mu: " << v.empty() << std :: endl;
+	std :: cout << "En baştaki eleman: " << v.front() << std :: endl;
+	std :: cout << "En sondaki eleman: " << v.back() << std :: endl;
+	std :: cout << "at(500) index değeri: " << v.at(500) << std :: endl;
+	
+	v.pop_back();
+	std :: cout << "En sondaki elemanı sildim yeni size: " << v.size() << std :: endl;
 
-int		main(void)
-{
-	container_type	ctnr;
+	ft::vector<int>::iterator i = v.begin();
+	int result = 0;
+	while (i != v.end()){
+		//std :: cout << "v[index]: " << *i << std :: endl;
+		result += *i++;
+	}
 
-	ctnr.push_back(21);
-	ctnr.push_back(42);
-	ctnr.push_back(1337);
-	ctnr.push_back(19);
-	ctnr.push_back(0);
-	ctnr.push_back(183792);
+	std :: cout << "İçindeki elemanların toplam değeri: " << result << std :: endl;
+	v.erase(v.begin() + 100, v.end() - 100);
+	std :: cout << "Silme işleminden sonra 200 size olmalı: " << v.size() << std :: endl;
 
-	t_stack_	stck(ctnr);
-	t_stack_	stck2(ctnr);
+	v.resize(10);
+	std :: cout << "Size yeniden boyutlandırdım yeni boyut 10 olmalı: " << v.size() << std :: endl;
+	
+	v.reserve(2000);
+	std :: cout << "Kapasiteyi yeniden boyutlandırdım yeni boyut 2000 olmalı: " << v.capacity() << std :: endl;
 
-	cmp(stck, stck);  // 0
-	cmp(stck, stck2); // 1
+	ft::vector<int> copy = v; // copy assignment operator test
 
-	stck2.push(60);
-	stck2.push(61);
-	stck2.push(62);
+	std :: cout << "################################### => Map <= ###################################" << std :: endl;
 
-	cmp(stck, stck2); // 2
-	cmp(stck2, stck); // 3
+	ft :: map<int, int> m;
 
-	stck.push(42);
+	int find = 0;
+	for (int i = 0; i < 1000; i++){
+		int number = rand();
+		m.insert(ft::make_pair(number, number));
+		if (i == 500)
+			find = number;
+	}
 
-	cmp(stck, stck2); // 4
-	cmp(stck2, stck); // 5
+	std :: cout << "Size: " << m.size() << std :: endl;
+	std :: cout << "42 sayısı mapte var mı: " << m.count(42) << std :: endl;
 
-	stck.push(100);
+	ft::map<int, int>::iterator first = m.begin();
 
-	cmp(stck, stck2); // 6
-	cmp(stck2, stck); // 7
+	while (first != m.end()){
+		//std :: cout << "key: " << first->first << "second: " << first->second << std :: endl;
+		first++;
+	}
+		
+	std :: cout << "find(): " << m.find(find)->first << std :: endl;
+	
+	ft::pair<ft::map<int, int>::iterator, ft::map<int, int>::iterator> eq = m.equal_range(42);
+	std :: cout << "lower: " << eq.first->first << "upper: " << eq.first->first << std :: endl;
+
+	std :: cout << "Map boş mu: " << m.empty() << std :: endl;
+	m.clear();
+	std :: cout << "Clear işlemınden sonra map boş mu: " << m.empty() << std :: endl;
+
 	return (0);
 }
-
